@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/models/location.dart';
-import 'package:myapp/models/weather_data.dart';
-import 'package:myapp/services/location_service.dart';
-import 'package:myapp/services/weather_service.dart';
-import 'package:myapp/widgets/temperature_display.dart';
-import 'package:myapp/widgets/weather_status.dart';
-import 'package:myapp/widgets/weather_conditions.dart';
+import 'package:clima/models/location.dart';
+import 'package:clima/models/weather_data.dart';
+import 'package:clima/services/location_service.dart';
+import 'package:clima/services/weather_service.dart';
+import 'package:clima/widgets/temperature_display.dart';
+import 'package:clima/widgets/weather_status.dart';
+import 'package:clima/widgets/weather_conditions.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -97,7 +97,10 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 40),
 
         // Temperature
-        TemperatureDisplay(temperature: _currentWeather!.temperature),
+        TemperatureDisplay(
+          celsius: _currentWeather!.temperature,
+          fahrenheit: _currentWeather!.temperatureFahrenheit,
+        ),
         const SizedBox(height: 40),
 
         // Weather Status

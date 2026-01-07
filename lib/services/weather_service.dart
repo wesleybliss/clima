@@ -1,15 +1,30 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:myapp/models/weather_data.dart';
-import 'package:myapp/models/location.dart';
+import 'package:clima/models/weather_data.dart';
+import 'package:clima/models/location.dart';
 
 class WeatherService {
-  static const String _apiKey = 'YOUR_API_KEY'; // Replace with your API key
   static const String _baseUrl = 'https://api.open-meteo.com/v1/forecast';
 
   Future<WeatherData> fetchWeather(Location location) async {
-    final url = Uri.parse(
-        '$_baseUrl?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,is_day&timezone=auto');
+    final currentParams = [
+      'temperature_2m',
+      'relative_humidity_2m',
+      'apparent_temperature',
+      'precipitation',
+      'weather_code',
+      'wind_speed_10m',
+      'is_day'
+    ].join(',');
+    
+    final params = [
+      'latitude=${location.latitude}',
+      'longitude=${location.longitude}',
+      'current=$currentParams',
+      'timezone=auto'
+    ];
+
+    final url = Uri.parse('$_baseUrl?${params.join('&')}');
 
     try {
       final response = await http.get(url);
