@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,8 +8,24 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties") // Assumes key.properties is in your android directory
+
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
+val localProperties = Properties()
+val localPropertiesFile = project.rootProject.file("local.properties")
+
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use {
+        localProperties.load(it)
+    }
+}
+
 android {
-    namespace = "com.example.clima"
+    namespace = "com.gammagamma.clima"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +40,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.clima"
+        applicationId = "com.gammagamma.clima"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -29,16 +48,57 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
-
+    
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String
+            keyPassword = keystoreProperties["keyPassword"] as String
+            storeFile = file(keystoreProperties["storeFile"] as String)
+            storePassword = keystoreProperties["storePassword"] as String
+        }
+    }
+    
+    flavorDimensions += "distribution"
+    
+    productFlavors {
+        create("standard") {
+            dimension = "distribution"
+            // Standard flavor includes all features (Firebase, etc.)
+        }
+        
+        create("foss") {
+            dimension = "distribution"
+            // FOSS flavor excludes proprietary libraries like Firebase
+            // Suitable for F-Droid and other FOSS app stores
+        }
+    }
+    
     buildTypes {
-        release {
+        debug {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            applicationIdSuffix = ".debug"
+            resValue("string", "app_name", "CLIMA-D")
+        }
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig = signingConfigs.getByName("release")
+            resValue("string", "app_name", "CLIMA")
         }
     }
+    
 }
 
 flutter {
     source = "../.."
+}
+
+// Apply Firebase plugins only if google-services.json exists in standard flavor
+// FOSS builds don't have this file
+val googleServicesFile = file("src/standard/google-services.json")
+if (googleServicesFile.exists()) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }

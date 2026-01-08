@@ -1,4 +1,5 @@
 import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart' hide Location;
 import 'package:clima/models/location.dart';
 
 class LocationService {
@@ -25,6 +26,27 @@ class LocationService {
     }
 
     final position = await Geolocator.getCurrentPosition();
-    return Location(latitude: position.latitude, longitude: position.longitude);
+    
+    String? name;
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+      
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks[0];
+        name = place.locality ?? place.subAdministrativeArea ?? place.administrativeArea;
+      }
+    } catch (e) {
+      // If geocoding fails, we'll just have a null name and the UI will show a default.
+      print('Failed to get placemark: $e');
+    }
+
+    return Location(
+      latitude: position.latitude,
+      longitude: position.longitude,
+      name: name,
+    );
   }
 }

@@ -1,4 +1,4 @@
-package com.example.clima
+package com.gammagamma.clima
 
 import io.flutter.embedding.android.FlutterActivity
 
